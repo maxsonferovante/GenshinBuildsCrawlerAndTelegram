@@ -26,13 +26,40 @@ Se deseja contribuir com este projeto, sinta-se à vontade para:
 - Melhorar a eficiência do web crawling.
 - Aperfeiçoar a organização do código.
 
-### Como Usar:
+### Como Usar Local:
 
-1. Clone o repositório: `git clone https://github.com/seu-usuario/nome-do-repositorio.git`
-2. Instale as dependências: `npm install`
-3. Configure as variáveis de ambiente, como o token do Telegram e a URL do site do jogo.
-4. Execute o bot: `npm run start`
+1. Clone o repositório: 
+```bash
+    git clone https://github.com/maxsonferovante/GenshinBuildsCrawlerAndTelegram`
+```
+2. Instale as dependências: 
+```bash
+    npm install
+```
+3. Configure as variáveis de ambiente no arquivo `.env`, como o token do Telegram e a URL do site do jogo.
+```bash 
+    TELEGRAM_TOKEN = 'TOKEN DA API DO TELEGRAM'
+    URL = 'https://genshin-builds.com/pt'
+```
+4. Execute o bot: 
+```bash 
+    npm run start
+```
 
+### Como Usar no Docker
+
+1. Clone o repositório: 
+```bash
+    git clone https://github.com/maxsonferovante/GenshinBuildsCrawlerAndTelegram`
+```
+2. Certifique-se de que o Docker está instalado com o comando:
+```bash
+    docker --version
+```
+3. Execute o comando abaixo e aguarde a criação e deploy da imagem:
+```bash
+    docker compose up
+```
 
 ### Teste do Bot em produção
 

@@ -1,7 +1,6 @@
 import puppeteer from 'puppeteer';
 import DiaDaSemana from '../Utils/DiaDaSemana.js';
 
-
 export default class WebCrawlerGenshinBuilds {
     /**
      * Initializes a new instance of the WebCrawlerGenshinBuilds class.
@@ -24,7 +23,14 @@ export default class WebCrawlerGenshinBuilds {
     async init() {
         return new Promise(async (resolve, reject) => {
             try {
-                this.browser = await puppeteer.launch({ headless: "new" });
+                this.browser = await puppeteer.launch(
+                    {
+                        executablePath: '/usr/bin/google-chrome',
+                        headless: "new",
+                        ignoreDefaultArgs: ['--disable-extensions'],
+                        args: ['--enable-gpu', '--no-sandbox', '--disable-setuid-sandbox'],
+                    }
+                );
                 console.log('Browser started');
 
                 this.page = await this.browser.newPage();

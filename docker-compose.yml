@@ -1,0 +1,10 @@
+version: '3.9'
+
+services:
+  app:
+    build: .
+    command: npm run start
+    env_file:
+      - .env
+    volumes:
+      - .:/usr/app
