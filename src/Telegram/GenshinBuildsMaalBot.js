@@ -18,6 +18,10 @@ export default class GenshinBuildsMaalBot {
         await this.sendWeapons();
         await this.sendAbout();
         await this.sendHelper();
+        await this.sendWeaponUpdateToFarme();
+    }
+    async sendWeaponUpdateToFarme() {
+        throw new Error('Method not implemented.');
     }
 
     /**
