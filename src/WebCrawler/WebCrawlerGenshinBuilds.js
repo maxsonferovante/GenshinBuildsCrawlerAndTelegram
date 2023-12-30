@@ -37,6 +37,11 @@ export default class WebCrawlerGenshinBuilds {
                 await this.page.setViewport({ width: 1440, height: 900 });
 
                 await this.page.goto(this.url);
+
+                this.page.on('pageerror', error => {
+                    console.log('PAGE ERROR:', error.message);
+                    throw new Error("PAGE ERROR:" + error.message);
+                });
                 console.log('Page loaded ', this.page.url());
                 await this.wait(5000);
 
