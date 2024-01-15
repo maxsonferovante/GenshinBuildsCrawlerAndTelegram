@@ -7,9 +7,9 @@ export default class GenshinBuildsMaalBot {
     constructor() {
         console.log('GenshinBuildsMaalBot initialized ...');
 
-        this.bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true, filepath: false });
+        this.bot = new TelegramBot('6494491836:AAGZAa_8jzmdLIs6TcU7S1lSO4blQV_p1uo', { polling: true, filepath: false });
 
-        this.crawler = new WebCrawlerGenshinBuildsPlayWright(process.env.URL);
+        this.crawler = new WebCrawlerGenshinBuildsPlayWright('https://genshin-builds.com/pt');
 
         this.keyboard = [["/weapons", "/characters"], ["/start"], ["/about"], ["/help"]];
     }
