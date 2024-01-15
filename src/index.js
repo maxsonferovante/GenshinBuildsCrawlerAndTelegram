@@ -1,8 +1,12 @@
 import GenshinBuildsMaalBot from './Telegram/GenshinBuildsMaalBot.js';
-import { config } from 'dotenv';
+import dotenv from 'dotenv';
 
 (async () => {
-    config();
+    dotenv.config(
+        {
+            path: '.env'
+        }
+    );
     const genshinBuildsMaalBot = new GenshinBuildsMaalBot();
     await genshinBuildsMaalBot.initBot();
 })();

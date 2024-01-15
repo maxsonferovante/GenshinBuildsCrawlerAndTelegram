@@ -1,5 +1,4 @@
 import TelegramBot from 'node-telegram-bot-api';
-import WebCrawlerGenshinBuilds from '../WebCrawler/WebCrawlerGenshinBuildsPlayWright.js';
 import DiaDaSemana from '../Utils/DiaDaSemana.js';
 import fs from 'node:fs';
 import WebCrawlerGenshinBuildsPlayWright from '../WebCrawler/WebCrawlerGenshinBuildsPlayWright.js';
