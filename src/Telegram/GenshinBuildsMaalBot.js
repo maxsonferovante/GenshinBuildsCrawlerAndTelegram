@@ -1,7 +1,8 @@
 import TelegramBot from 'node-telegram-bot-api';
-import WebCrawlerGenshinBuilds from '../WebCrawler/WebCrawlerGenshinBuilds.js';
+import WebCrawlerGenshinBuilds from '../WebCrawler/WebCrawlerGenshinBuildsPlayWright.js';
 import DiaDaSemana from '../Utils/DiaDaSemana.js';
 import fs from 'node:fs';
+import WebCrawlerGenshinBuildsPlayWright from '../WebCrawler/WebCrawlerGenshinBuildsPlayWright.js';
 
 export default class GenshinBuildsMaalBot {
     constructor() {
@@ -9,19 +10,16 @@ export default class GenshinBuildsMaalBot {
 
         this.bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true, filepath: false });
 
-        this.crawler = new WebCrawlerGenshinBuilds(process.env.URL);
+        this.crawler = new WebCrawlerGenshinBuildsPlayWright(process.env.URL);
 
-        this.keyboard = [["/weapons"], ["/start"], ["/about"], ["/help"]];
+        this.keyboard = [["/weapons", "/characters"], ["/start"], ["/about"], ["/help"]];
     }
     async initBot() {
         await this.welconeGenshinBuidlsMaalBot();
+        await this.sendCharacters();
         await this.sendWeapons();
         await this.sendAbout();
         await this.sendHelper();
-        await this.sendWeaponUpdateToFarme();
-    }
-    async sendWeaponUpdateToFarme() {
-        throw new Error('Method not implemented.');
     }
 
     /**
@@ -69,6 +67,37 @@ export default class GenshinBuildsMaalBot {
             }
         });
     }
+    async sendCharacters() {
+        this.bot.onText(/\/characters/, async (msg) => {
+            const chatId = msg.chat.id;
+            console.log(`Init sendCharacters ${chatId}`)
+            try {
+                this.bot.sendMessage(chatId, `<i> Aguarde, estamos buscando os personagens disponíveis para farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) ... </i>`, { parse_mode: 'HTML' });
+                await this.crawler.init(
+                    this.crawler.options.characters
+                );
+
+                await this.bot.sendMessage(chatId, `Personagens Disponível para Farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
+
+                for (const [key, value] of Object.entries(this.crawler.dictCharacter)) {
+                    let quantityCharacters = value.length + 1;
+                    await this.bot.sendMessage(chatId,
+                        `<b>${key}</b> \n\n${value.map((character) => {
+                            quantityCharacters--;
+                            const textResponse = `${(value.length - quantityCharacters) + 1} - <a href="${character.url}">${character.name}</a>`;
+                            return textResponse;
+                        }).join(' \n')}`
+                        , { parse_mode: 'HTML' });
+                }
+            } catch (error) {
+                this.bot.sendMessage(chatId, 'Ocorreu um erro ao tentar obter os personagens.');
+                console.error(error);
+            }
+            finally {
+                console.log(`End sendCharacters ${chatId}`)
+            }
+        });
+    }
     /**
          * Sends a message to the user with a list of available weapons to farm in the game Genshin Impact.
          * 
@@ -82,10 +111,13 @@ export default class GenshinBuildsMaalBot {
 
         this.bot.onText(/\/weapons/, async (msg) => {
             const chatId = msg.chat.id;
+            console.log(`Init sendCharacters ${chatId}`)
             try {
                 this.bot.sendMessage(chatId, `<i> Aguarde, estamos buscando as armas disponíveis para farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) ... </i>`, { parse_mode: 'HTML' });
 
-                await this.crawler.init();
+                await this.crawler.init(
+                    this.crawler.options.weapons
+                );
 
                 await this.bot.sendMessage(chatId, `Armas Disponível para Ffarmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
 
@@ -103,6 +135,9 @@ export default class GenshinBuildsMaalBot {
             } catch (error) {
                 this.bot.sendMessage(chatId, 'Ocorreu um erro ao tentar obter as armas.');
                 console.error(error);
+            }
+            finally {
+                console.log(`End sendCharacters ${chatId}`)
             }
         });
     }
