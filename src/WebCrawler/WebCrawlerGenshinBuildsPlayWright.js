@@ -32,6 +32,7 @@ export default class WebCrawlerGenshinBuildsPlayWright {
                 this.browser = await chromium.launch(
                     {
                         headless: true,
+                        args: ['--ignore-certificate-errors', '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
                     }
                 );
                 console.log('Browser started');
