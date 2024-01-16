@@ -34,16 +34,20 @@ Se deseja contribuir com este projeto, sinta-se à vontade para:
 ```
 2. Instale as dependências: 
 ```bash
-    npm install
+    yarn install
 ```
-3. Configure as variáveis de ambiente no arquivo `.env`, como o token do Telegram e a URL do site do jogo.
+3. Instale Playwright:
+```bash
+    yarn playwright install    
+```
+4. Configure as variáveis de ambiente no arquivo `.env`, como o token do Telegram e a URL do site do jogo.
 ```bash 
     TELEGRAM_TOKEN = 'TOKEN DA API DO TELEGRAM'
     URL = 'https://genshin-builds.com/pt'
 ```
-4. Execute o bot: 
+5. Execute o bot: 
 ```bash 
-    npm run start
+    yarn run start
 ```
 
 ### Como Usar no Docker
