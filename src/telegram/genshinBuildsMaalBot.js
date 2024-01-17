@@ -4,6 +4,9 @@ import fs from 'node:fs';
 
 import WebCrawlerGenshinBuildsPlayWright from '../webCrawler/webCrawlerGenshinBuildsPlayWright.js';
 import SqliteUserRepository from '../database/repositories/sqliteUserRepository.js';
+import { captureRejectionSymbol } from 'node:events';
+
+const LINK_REPOSITORY = "https://github.com/maxsonferovante/GenshinBuildsCrawlerAndTelegram"
 
 export default class GenshinBuildsMaalBot {
     /**
@@ -23,14 +26,14 @@ export default class GenshinBuildsMaalBot {
 
         this.fileBuffer = fs.readFileSync('./src/media/img/logo.png');
 
-        this.keyboard = [["/weapons", "/characters"], ["/start", "/about"], ["/help"]];
+        this.keyboard = [["/weapons", "/characters"], ["/start", "/about"]];
     }
     async initBot() {
         await this.welconeGenshinBuidlsMaalBot();
         await this.sendCharacters();
         await this.sendWeapons();
         await this.sendAbout();
-        await this.sendHelper();
+        //await this.sendHelper();
     }
 
     /**
@@ -217,14 +220,25 @@ export default class GenshinBuildsMaalBot {
         this.bot.onText(/\/about/, async (msg) => {
             try {
                 const chatId = msg.chat.id;
+                const userExist = await this.sqliteUserRepository.existsByChatId(chatId);
+                let caption = ''
+                if (!userExist){
+                      caption = `<b>Olá ${msg.from.first_name}</b>, Bem-vindo ao Genshin-Builds Maal-Bot! 🔮⚔️
+                                \n Aqui você descobrirá quais armas são mais vantajosas para farmar, otimizando suas estratégias no mundo de Genshin Impact. 
+                                \n Estou aqui para ajudar você a escolher as armas ideais para potencializar o poder dos seus personagens! 🌟✨
+                                \n Para mais informações acesse o <a href="${LINK_REPOSITORY}">link</a>.` 
+                }
+                else{
+                    caption = `<b>Olá ${msg.from.first_name}</b>, Bem-vindo novamente ao Genshin-Builds Maal-Bot! 🔮⚔️
+                                \n Aqui você descobrirá quais armas são mais vantajosas para farmar, otimizando suas estratégias no mundo de Genshin Impact. 
+                                \n Estou aqui para ajudar você a escolher as armas ideais para potencializar o poder dos seus personagens! 🌟✨
+                                \n Para mais informações acesse o <a href="${LINK_REPOSITORY}">link</a>.` 
+                        
+                }
                 await this.bot.sendPhoto(chatId,
                     this.fileBuffer,
                     {
-                        caption:
-                            `<b>Olá ${msg.from.first_name}</b>, Bem-vindo ao Genshin-Builds Maal-Bot! 🔮⚔️  
-                            \n Aqui você descobrirá quais armas são mais vantajosas para farmar, otimizando suas estratégias no mundo de Genshin Impact. 
-                            \n Estou aqui para ajudar você a escolher as armas ideais para potencializar o poder dos seus personagens! 🌟✨
-                            \n Para mais informações acesse o link abaixo: link`,
+                        caption:caption,
                         reply_markup: {
                             // @ts-ignore
                             "keyboard": this.keyboard,
@@ -237,7 +251,8 @@ export default class GenshinBuildsMaalBot {
                         filename: 'logo.png',
                         contentType: 'image/png'
                     }
-                );
+                );  
+                
             } catch (error) {
                 const chatId = msg.chat.id;
                 await this.bot.sendMessage(chatId, 'Possivelmente estamos com problemas, tente novamente mais tarde.');
