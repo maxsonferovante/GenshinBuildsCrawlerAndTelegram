@@ -1,4 +1,4 @@
-import GenshinBuildsMaalBot from './Telegram/GenshinBuildsMaalBot.js';
+import GenshinBuildsMaalBot from './telegram/genshinBuildsMaalBot.js';
 import dotenv from 'dotenv';
 
 (async () => {
