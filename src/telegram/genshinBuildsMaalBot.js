@@ -115,7 +115,15 @@ export default class GenshinBuildsMaalBot {
 
                 await this.bot.sendMessage(chatId, 
                     `<i> Aguarde, estamos buscando os personagens disponíveis para farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) ... </i>`, 
-                    { parse_mode: 'HTML' });
+                    { 
+                        parse_mode: 'HTML',
+                        reply_markup: {
+                            // @ts-ignore
+                            "keyboard": this.keyboard,
+                            "resize_keyboard": true,
+                            "one_time_keyboard": true
+                        } 
+                });
                 
                     await this.crawler.init(
                     this.crawler.options.characters
@@ -157,7 +165,17 @@ export default class GenshinBuildsMaalBot {
             const chatId = msg.chat.id;
             console.log(`Init sendCharacters ${chatId}`)
             try {
-                await this.bot.sendMessage(chatId, `<i> Aguarde, estamos buscando as armas disponíveis para farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) ... </i>`, { parse_mode: 'HTML' });
+                await this.bot.sendMessage(chatId, 
+                    `<i> Aguarde, estamos buscando as armas disponíveis para farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) ... </i>`,
+                    { 
+                        parse_mode: 'HTML',
+                        reply_markup: {
+                            // @ts-ignore
+                            "keyboard": this.keyboard,
+                            "resize_keyboard": true,
+                            "one_time_keyboard": true
+                        } 
+                });
 
                 await this.crawler.init(
                     this.crawler.options.weapons
@@ -251,7 +269,15 @@ export default class GenshinBuildsMaalBot {
                             \n /report - Reporta um erro para o desenvolvedor
                             \n /source - Link do código fonte
                             `,
-                    { parse_mode: "HTML" }
+                            { 
+                                parse_mode: 'HTML',
+                                reply_markup: {
+                                    // @ts-ignore
+                                    "keyboard": this.keyboard,
+                                    "resize_keyboard": true,
+                                    "one_time_keyboard": true
+                                } 
+                        }
                 );
             } catch (error) {
                 const chatId = msg.chat.id;
