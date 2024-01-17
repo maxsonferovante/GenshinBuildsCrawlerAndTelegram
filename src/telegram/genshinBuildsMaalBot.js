@@ -23,7 +23,7 @@ export default class GenshinBuildsMaalBot {
 
         this.fileBuffer = fs.readFileSync('./src/media/img/logo.png');
 
-        this.keyboard = [["/weapons", "/characters"], ["/start"], ["/about"], ["/help"]];
+        this.keyboard = [["/weapons", "/characters"], ["/start", "/about"], ["/help"]];
     }
     async initBot() {
         await this.welconeGenshinBuidlsMaalBot();
@@ -112,8 +112,12 @@ export default class GenshinBuildsMaalBot {
             const chatId = msg.chat.id;
             console.log(`Init sendCharacters ${chatId}`)
             try {
-                this.bot.sendMessage(chatId, `<i> Aguarde, estamos buscando os personagens disponíveis para farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) ... </i>`, { parse_mode: 'HTML' });
-                await this.crawler.init(
+
+                await this.bot.sendMessage(chatId, 
+                    `<i> Aguarde, estamos buscando os personagens disponíveis para farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) ... </i>`, 
+                    { parse_mode: 'HTML' });
+                
+                    await this.crawler.init(
                     this.crawler.options.characters
                 );
 
@@ -153,7 +157,7 @@ export default class GenshinBuildsMaalBot {
             const chatId = msg.chat.id;
             console.log(`Init sendCharacters ${chatId}`)
             try {
-                this.bot.sendMessage(chatId, `<i> Aguarde, estamos buscando as armas disponíveis para farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) ... </i>`, { parse_mode: 'HTML' });
+                await this.bot.sendMessage(chatId, `<i> Aguarde, estamos buscando as armas disponíveis para farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) ... </i>`, { parse_mode: 'HTML' });
 
                 await this.crawler.init(
                     this.crawler.options.weapons
@@ -195,10 +199,8 @@ export default class GenshinBuildsMaalBot {
         this.bot.onText(/\/about/, async (msg) => {
             try {
                 const chatId = msg.chat.id;
-                const fileBuffer = fs.readFileSync('./src/media/img/logo.png')
-
                 await this.bot.sendPhoto(chatId,
-                    fileBuffer,
+                    this.fileBuffer,
                     {
                         caption:
                             `<b>Olá ${msg.from.first_name}</b>, Bem-vindo ao Genshin-Builds Maal-Bot! 🔮⚔️  
