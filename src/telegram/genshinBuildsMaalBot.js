@@ -54,54 +54,41 @@ export default class GenshinBuildsMaalBot {
                 console.log(msg);
                 const chatId = msg.chat.id;
                 const userExist = await this.sqliteUserRepository.existsByChatId(chatId);
+                let capition = ''
                 if (userExist){
-                    await this.bot.sendPhoto(
-                        chatId,
-                        this.fileBuffer,
-                        {
-                            caption: `<b>Olá ${msg.from.first_name}</b>, Bem-vindo novamente Genshin-Builds Maal-Bot! 🔮⚔️ 
-                            \n Aqui você descobrirá quais armas são mais vantajosas para farmar, otimizando suas estratégias no mundo de Genshin Impact.` ,
-                            reply_markup: {
-                                // @ts-ignore
-                                "keyboard": this.keyboard,
-                                "resize_keyboard": true,
-                                "one_time_keyboard": true
-                            },
-                            parse_mode: "HTML"
-                        },
-                        {
-                            filename: 'logo.png',
-                            contentType: 'image/png'
-                        }
-                    );
+                    capition = `<b>Olá ${msg.from.first_name}</b>, Bem-vindo novamente ao Genshin-Builds Maal-Bot! 🔮⚔️                    
+                                \n Aqui você descobrirá quais armas são mais vantajosas para farmar, otimizando suas estratégias no mundo de Genshin Impact. 
+                                \n Estou aqui para ajudar você a escolher as armas ideais para potencializar o poder dos seus personagens! 🌟✨`
                 }
                 else {                  
-                    await this.bot.sendPhoto(
-                        chatId,
-                        this.fileBuffer,
-                        {
-                            caption: `<b>Olá ${msg.from.first_name}</b>, Bem-vindo ao Genshin-Builds Maal-Bot! 🔮⚔️  
-                            \n Aqui você descobrirá quais armas são mais vantajosas para farmar, otimizando suas estratégias no mundo de Genshin Impact. 
-                            \n Estou aqui para ajudar você a escolher as armas ideais para potencializar o poder dos seus personagens! 🌟✨`,
-                            reply_markup: {
-                                // @ts-ignore
-                                "keyboard": this.keyboard,
-                                "resize_keyboard": true,
-                                "one_time_keyboard": true
-                            },
-                            parse_mode: "HTML"
-                        },
-                        {
-                            filename: 'logo.png',
-                            contentType: 'image/png'
-                        }
-                    );
+                    capition = `<b>Olá ${msg.from.first_name}</b>, Bem-vindo ao Genshin-Builds Maal-Bot! 🔮⚔️                                        
+                                \n Aqui você descobrirá quais armas são mais vantajosas para farmar, otimizando suas estratégias no mundo de Genshin Impact. 
+                                \n Estou aqui para ajudar você a escolher as armas ideais para potencializar o poder dos seus personagens! 🌟✨`
+                    
                     await this.sqliteUserRepository.create({
                         firstName: msg.from.first_name,
                         lastName: msg.from.last_name,
                         chatId: msg.chat.id
                     });
                 }
+                await this.bot.sendPhoto(
+                    chatId,
+                    this.fileBuffer,
+                    {
+                        caption: capition,
+                        reply_markup: {
+                            // @ts-ignore
+                            "keyboard": this.keyboard,
+                            "resize_keyboard": true,
+                            "one_time_keyboard": true
+                        },
+                        parse_mode: "HTML"
+                    },
+                    {
+                        filename: 'logo.png',
+                        contentType: 'image/png'
+                    }
+                );
                 
             } catch (error) {
                 const chatId = msg.chat.id;
