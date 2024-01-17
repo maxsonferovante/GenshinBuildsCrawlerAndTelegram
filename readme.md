@@ -44,8 +44,13 @@ Se deseja contribuir com este projeto, sinta-se à vontade para:
 ```bash 
     TELEGRAM_TOKEN = 'TOKEN DA API DO TELEGRAM'
     URL = 'https://genshin-builds.com/pt'
+    DATABASE_URL = "URL DO BANCO DE DADOS"
 ```
-5. Execute o bot: 
+5. Execute as migrações para geração das tabelas no banco de dados:
+```bash
+    npx prisma migrate dev --name init 
+```
+6. Execute o bot: 
 ```bash 
     yarn run start
 ```
