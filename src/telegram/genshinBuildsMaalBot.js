@@ -51,7 +51,6 @@ export default class GenshinBuildsMaalBot {
 
         this.bot.onText(/\/start/, async (msg) => {
             try {
-                console.log(msg);
                 const chatId = msg.chat.id;
                 const userExist = await this.sqliteUserRepository.existsByChatId(chatId);
                 let capition = ''

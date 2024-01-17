@@ -12,9 +12,8 @@ RUN npm install
 RUN npm install dotenv
 RUN npm install @playwright/browser-chromium
 RUN npx prisma generate
-RUN prisma migrate deploy
 
-CMD [ "npm", "run", "start" ]
+CMD [ "npm", "run", "start:migrate" ]
 
 
 
