@@ -4,28 +4,29 @@ services:
   app:
     container_name: genshin-app
     build: .
-    command: npm run start
+    restart: always
+    depends_on:
+      - postgres
     env_file:
       - .env
-    volumes:
-      - .:/usr/app
     networks:
       - genshin-net
+  
   postgres:
     image: postgres
     container_name: genshin-postgres
     restart: always
-    env_file:
-      - .env
     ports:
       - 5432:5432
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: genshin_builds
     
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - /var/lib/postgresql/data # cria e monta um volume anônimo no contêiner
     networks:
       - genshin-net
 
