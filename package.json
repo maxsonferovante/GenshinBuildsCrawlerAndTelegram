@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node src/index.js",
-    "start:migrate": "prisma migrate deploy && yarn run start"
+    "start:migrate": "prisma migrate deploy && npm run start"
   },
   "keywords": [],
   "author": "",
