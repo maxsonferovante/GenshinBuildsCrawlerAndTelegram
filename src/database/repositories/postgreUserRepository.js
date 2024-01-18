@@ -3,7 +3,7 @@ import User from '../models/user.js'
 import { Prisma } from '@prisma/client'
 
 
-export default class SqliteUserRepository{
+export default class PostgreUserRepository{
     // o parametro é do tipo User
     async create({firstName, lastName, chatId}){
         try {

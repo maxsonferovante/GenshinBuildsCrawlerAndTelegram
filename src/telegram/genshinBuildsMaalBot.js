@@ -3,8 +3,9 @@ import DiaDaSemana from '../utils/diaDaSemana.js';
 import fs from 'node:fs';
 
 import WebCrawlerGenshinBuildsPlayWright from '../webCrawler/webCrawlerGenshinBuildsPlayWright.js';
-import SqliteUserRepository from '../database/repositories/sqliteUserRepository.js';
-import { captureRejectionSymbol } from 'node:events';
+import PostgreUserRepository from '../database/repositories/postgreUserRepository.js'; '../database/repositories/postgreUserRepository.js';
+
+
 
 const LINK_REPOSITORY = "https://github.com/maxsonferovante/GenshinBuildsCrawlerAndTelegram"
 
@@ -18,7 +19,7 @@ export default class GenshinBuildsMaalBot {
     constructor() {
         console.log('GenshinBuildsMaalBot initialized ...');
 
-        this.sqliteUserRepository = new SqliteUserRepository();
+        this.postgreUserRepository = new PostgreUserRepository();
 
         this.bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true, filepath: false });
 
@@ -52,7 +53,7 @@ export default class GenshinBuildsMaalBot {
         this.bot.onText(/\/start/, async (msg) => {
             try {
                 const chatId = msg.chat.id;
-                const userExist = await this.sqliteUserRepository.existsByChatId(chatId);
+                const userExist = await this.postgreUserRepository.existsByChatId(chatId);
                 let capition = ''
                 if (userExist){
                     capition = `<b>Olá ${msg.from.first_name}</b>, Bem-vindo novamente ao Genshin-Builds Maal-Bot! 🔮⚔️                    
@@ -64,7 +65,7 @@ export default class GenshinBuildsMaalBot {
                                 \n Aqui você descobrirá quais armas são mais vantajosas para farmar, otimizando suas estratégias no mundo de Genshin Impact. 
                                 \n Estou aqui para ajudar você a escolher as armas ideais para potencializar o poder dos seus personagens! 🌟✨`
                     
-                    await this.sqliteUserRepository.create({
+                    await this.postgreUserRepository.create({
                         firstName: msg.from.first_name,
                         lastName: msg.from.last_name,
                         chatId: msg.chat.id
@@ -206,7 +207,7 @@ export default class GenshinBuildsMaalBot {
         this.bot.onText(/\/about/, async (msg) => {
             try {
                 const chatId = msg.chat.id;
-                const userExist = await this.sqliteUserRepository.existsByChatId(chatId);
+                const userExist = await this.postgreUserRepository.existsByChatId(chatId);
                 let caption = ''
                 if (!userExist){
                       caption = `<b>Olá ${msg.from.first_name}</b>, Bem-vindo ao Genshin-Builds Maal-Bot! 🔮⚔️
