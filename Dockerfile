@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:21-alpine3.18
 
 FROM mcr.microsoft.com/playwright:v1.40.0-jammy
 
