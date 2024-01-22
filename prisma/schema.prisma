@@ -8,7 +8,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      =  "postgresql://postgres:postgres@localhost:5432/genshin_builds"
 }
 
 
@@ -24,6 +24,7 @@ model User {
 model Dungeon{
   id        Int      @id @default(autoincrement())
   name  String
+  dayOfTheWeek String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   weapons Weapons[]

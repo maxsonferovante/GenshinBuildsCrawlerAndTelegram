@@ -44,6 +44,7 @@ export default class PostgreUserRepository{
             return new User(
                 {
                     id: user.id,
+                    // @ts-ignore
                     firstName: user.firstName,
                     lastName: user.lastName,
                     chatId: user.chatId,
@@ -57,6 +58,9 @@ export default class PostgreUserRepository{
         }
     }
 
+    /**
+     * @param {number} chatId
+     */
     async existsByChatId(chatId){
         try {
             const user = await prisma.user.findFirst({
@@ -64,7 +68,17 @@ export default class PostgreUserRepository{
                     chatId
                 }
             })
-            return typeof user !== 'undefined'
+            return user !== null
+        } catch (error) {
+            console.log(error)
+            throw new Error('Erro ao buscar usuário')
+        }
+    }
+
+    async getAll(){
+        try {
+            const users = await prisma.user.findMany()
+            return users
         } catch (error) {
             console.log(error)
             throw new Error('Erro ao buscar usuário')
