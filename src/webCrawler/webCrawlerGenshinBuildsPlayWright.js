@@ -27,7 +27,6 @@ export default class WebCrawlerGenshinBuildsPlayWright {
      * @param {string} [characterOrWeapon]
      */
     async init(characterOrWeapon) {
-        return new Promise(async (resolve, reject) => {
             try {
                 this.browser = await chromium.launch(
                     {
@@ -70,12 +69,9 @@ export default class WebCrawlerGenshinBuildsPlayWright {
                     await this.get_characters_names();
                     await this.get_characters_data();
                 }
-                await this.close();
-                resolve();
             } catch (error) {
-                reject(error);
+                return error;
             }
-        });
     }
 
     get_json_weapons() {
@@ -116,7 +112,6 @@ export default class WebCrawlerGenshinBuildsPlayWright {
      */
     async get_img_character(href) {
         const character = href.replace('https://genshin-builds.com/pt/character/', '');
-        console.log(`get img character ${character}`);
         const pathInPage = `https://i2.wp.com/genshinbuilds.aipurrjects.com/genshin/characters/${character}.png?strip=all&quality=100&w=80`;
         return pathInPage;
     }
@@ -167,7 +162,6 @@ export default class WebCrawlerGenshinBuildsPlayWright {
      */
     get_img_weapon(path) {
         const weapon = path.replace('pt/weapon/', '')
-        console.log(`get img weapon ${weapon}`);
         const pathInPage = `https://i2.wp.com/genshinbuilds.aipurrjects.com/genshin/weapons/${weapon}.png?strip=all&quality=100&w=80`;
         return pathInPage;
     }

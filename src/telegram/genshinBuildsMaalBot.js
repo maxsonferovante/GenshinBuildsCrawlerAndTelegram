@@ -1,10 +1,14 @@
 import TelegramBot from 'node-telegram-bot-api';
-import DiaDaSemana from '../utils/diaDaSemana.js';
 import fs from 'node:fs';
+import cron from 'node-cron';
+
+
+import DiaDaSemana from '../utils/diaDaSemana.js';
 
 import WebCrawlerGenshinBuildsPlayWright from '../webCrawler/webCrawlerGenshinBuildsPlayWright.js';
-import PostgreUserRepository from '../database/repositories/postgreUserRepository.js'; '../database/repositories/postgreUserRepository.js';
-
+import PostgreUserRepository from '../database/repositories/postgreUserRepository.js'; 
+import PostgreWeaponsRepository from '../database/repositories/postgreWeaponsRepository.js';
+import PostgreCharacterRepository from '../database/repositories/postgreCharacterRepository.js';
 
 
 const LINK_REPOSITORY = "https://github.com/maxsonferovante/GenshinBuildsCrawlerAndTelegram"
@@ -20,6 +24,8 @@ export default class GenshinBuildsMaalBot {
         console.log('GenshinBuildsMaalBot initialized ...');
 
         this.postgreUserRepository = new PostgreUserRepository();
+        this.postgreWeaponsRepository = new PostgreWeaponsRepository();
+        this.postgreCharacterRepository = new PostgreCharacterRepository();
 
         this.bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true, filepath: false });
 
@@ -34,7 +40,92 @@ export default class GenshinBuildsMaalBot {
         await this.sendCharacters();
         await this.sendWeapons();
         await this.sendAbout();
+        this.SendUpdateDaily();
         //await this.sendHelper();
+    }
+    SendUpdateDaily() {
+        cron.schedule('20 6 * * *', async () => {
+            console.log('Iniciando o serviço às 6:20...');
+            const usersSaved = await this.postgreUserRepository.getAll()
+
+            for (const user of usersSaved) {
+                const chatId = user.chatId;
+                try {
+                    await this.bot.sendMessage(chatId,
+                        `<i> Aguarde, estamos buscando as armas disponíveis para farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) ... </i>`,
+                        {
+                            parse_mode: 'HTML',
+                            reply_markup: {
+                                // @ts-ignore
+                                "keyboard": this.keyboard,
+                                "resize_keyboard": true,
+                                "one_time_keyboard": true
+                            }
+                        });
+
+                    await this.crawler.init(
+                        this.crawler.options.weapons
+                    );
+                    await this.bot.sendMessage(chatId, `Armas Disponível para Farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
+
+                    for (const [key, value] of Object.entries(this.crawler.dictWeapon)) {
+                        let quantityWeapons = value.length + 1;
+                        await this.bot.sendMessage(chatId,
+                            `<b>${key}</b> \n\n${value.map((weapon) => {
+                                quantityWeapons--;
+                                const textResponse = `${(value.length - quantityWeapons) + 1} - <a href="${weapon.url}">${weapon.name}</a>`;
+                                return textResponse;
+                            }).join(' \n')}`
+                            , { parse_mode: 'HTML' });
+                    }
+
+                } catch (error) {
+                    this.bot.sendMessage(chatId, 'Ocorreu um erro ao tentar obter as armas.');
+                    console.error(error);
+                }
+                
+
+                try{
+                    await this.bot.sendMessage(chatId,
+                        `<i> Aguarde, estamos buscando os personagens disponíveis para farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) ... </i>`,
+                        {
+                            parse_mode: 'HTML',
+                            reply_markup: {
+                                // @ts-ignore
+                                "keyboard": this.keyboard,
+                                "resize_keyboard": true,
+                                "one_time_keyboard": true
+                            }
+                        });
+
+                    await this.crawler.init(
+                        this.crawler.options.characters
+                    );
+
+                    await this.bot.sendMessage(chatId, `Personagens Disponível para Farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
+
+                    for (const [key, value] of Object.entries(this.crawler.dictCharacter)) {
+                        let quantityCharacters = value.length + 1;
+                        await this.bot.sendMessage(chatId,
+                            `<b>${key}</b> \n\n${value.map((character) => {
+                                quantityCharacters--;
+                                const textResponse = `${(value.length - quantityCharacters) + 1} - <a href="${character.url}">${character.name}</a>`;
+                                return textResponse;
+                            }).join(' \n')}`
+                            , { parse_mode: 'HTML' });
+                    }
+                }
+                catch(error){
+                    console.log(error)
+                }
+                
+            }
+            
+            
+            
+            const dataFinalizacao = new Date()
+            console.log(`Finalizando o serviço às ${dataFinalizacao.getHours()}:${dataFinalizacao.getMinutes()}`);
+        });
     }
 
     /**
@@ -170,7 +261,7 @@ export default class GenshinBuildsMaalBot {
                 await this.crawler.init(
                     this.crawler.options.weapons
                 );
-
+                console.log(await this.postgreWeaponsRepository.getAll())
                 await this.bot.sendMessage(chatId, `Armas Disponível para Ffarmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
 
                 for (const [key, value] of Object.entries(this.crawler.dictWeapon)) {

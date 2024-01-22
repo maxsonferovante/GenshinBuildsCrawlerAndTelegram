@@ -1,4 +1,6 @@
 import GenshinBuildsMaalBot from './telegram/genshinBuildsMaalBot.js';
+import WebCrawlerGenshinBuildsService from './webCrawler/WebCrawlerGenshinBuildsService.js';
+import prisma from './database/prisma.js'
 import dotenv from 'dotenv';
 
 (async () => {
@@ -7,6 +9,17 @@ import dotenv from 'dotenv';
             path: '.env'
         }
     );
+    const webCrawlerGenshinBuildsService = new WebCrawlerGenshinBuildsService();
     const genshinBuildsMaalBot = new GenshinBuildsMaalBot();
-    await genshinBuildsMaalBot.initBot();
+
+    try {
+        
+        await webCrawlerGenshinBuildsService.run()
+        await genshinBuildsMaalBot.initBot()     
+    } catch (error) {
+        console.log(error)
+        prisma.$disconnect()
+        process.exit(1)
+    }
+        
 })();
