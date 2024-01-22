@@ -8,7 +8,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      =  "postgresql://postgres:postgres@localhost:5432/genshin_builds"
+  url      =  "postgresql://postgres:postgres@genshin-postgres:5432/genshin_builds"
 }
 
 
