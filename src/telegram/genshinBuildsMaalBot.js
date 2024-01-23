@@ -7,9 +7,7 @@ import DiaDaSemana from '../utils/diaDaSemana.js';
 
 import WebCrawlerGenshinBuildsPlayWright from '../webCrawler/webCrawlerGenshinBuildsPlayWright.js';
 import PostgreUserRepository from '../database/repositories/postgreUserRepository.js'; 
-import PostgreWeaponsRepository from '../database/repositories/postgreWeaponsRepository.js';
-import PostgreCharacterRepository from '../database/repositories/postgreCharacterRepository.js';
-
+import PostgreDungeonRepository from '../database/repositories/postgreDungeonRepository.js';
 
 const LINK_REPOSITORY = "https://github.com/maxsonferovante/GenshinBuildsCrawlerAndTelegram"
 
@@ -24,8 +22,7 @@ export default class GenshinBuildsMaalBot {
         console.log('GenshinBuildsMaalBot initialized ...');
 
         this.postgreUserRepository = new PostgreUserRepository();
-        this.postgreWeaponsRepository = new PostgreWeaponsRepository();
-        this.postgreCharacterRepository = new PostgreCharacterRepository();
+        this.postgreDungeonRepository = new PostgreDungeonRepository();
 
         this.bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true, filepath: false });
 
@@ -40,10 +37,10 @@ export default class GenshinBuildsMaalBot {
         await this.sendCharacters();
         await this.sendWeapons();
         await this.sendAbout();
-        this.SendUpdateDaily();
+        //await this.SendUpdateDaily();
         //await this.sendHelper();
     }
-    SendUpdateDaily() {
+    async SendUpdateDaily() {
         cron.schedule('20 6 * * *', async () => {
             console.log('Iniciando o serviço às 6:20...');
             const usersSaved = await this.postgreUserRepository.getAll()
@@ -206,12 +203,10 @@ export default class GenshinBuildsMaalBot {
                         } 
                 });
                 
-                    await this.crawler.init(
-                    this.crawler.options.characters
-                );
-
+                await this.crawler.init(this.crawler.options.characters);
+                
                 await this.bot.sendMessage(chatId, `Personagens Disponível para Farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
-
+                
                 for (const [key, value] of Object.entries(this.crawler.dictCharacter)) {
                     let quantityCharacters = value.length + 1;
                     await this.bot.sendMessage(chatId,
@@ -258,22 +253,21 @@ export default class GenshinBuildsMaalBot {
                         } 
                 });
 
-                await this.crawler.init(
-                    this.crawler.options.weapons
-                );
-                console.log(await this.postgreWeaponsRepository.getAll())
+                //await this.crawler.init(this.crawler.options.weapons);
+                const dungeonsAndWepons = await this.postgreDungeonRepository.getDungeonAndWeponsToFarmToday()             
+                
                 await this.bot.sendMessage(chatId, `Armas Disponível para Ffarmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
 
-                for (const [key, value] of Object.entries(this.crawler.dictWeapon)) {
-                    let quantityWeapons = value.length + 1;
+                for (const dungeon of dungeonsAndWepons) {
+                    let quantityWeapons = dungeon.weapons.length + 1;
                     await this.bot.sendMessage(chatId,
-                        `<b>${key}</b> \n\n${value.map((weapon) => {
+                        `<b>${dungeon.name}</b> \n\n${dungeon.weapons.map((/** @type {{ url: any; name: any; }} */ weapon) => {
                             quantityWeapons--;
-                            const textResponse = `${(value.length - quantityWeapons) + 1} - <a href="${weapon.url}">${weapon.name}</a>`;
+                            const textResponse = `${(dungeon.weapons.length - quantityWeapons) + 1} - <a href="${weapon.url}">${weapon.name}</a>`;
                             return textResponse;
                         }).join(' \n')}`
                         , { parse_mode: 'HTML' });
-                }
+                }              
 
             } catch (error) {
                 this.bot.sendMessage(chatId, 'Ocorreu um erro ao tentar obter as armas.');

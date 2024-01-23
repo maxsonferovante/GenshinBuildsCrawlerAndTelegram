@@ -1,8 +1,42 @@
 import prisma from '../prisma.js'
-import { Prisma } from '@prisma/client'
 
+import DiaDaSemana from '../../utils/diaDaSemana.js';
 
 export default class PostgreDungeonRepository{
+    
+    async getDungeonAndWeponsToFarmToday(){ 
+        try {
+            const dungeons = await prisma.dungeon.findMany({
+                where:{
+                    dayOfTheWeek: DiaDaSemana.obterDiaAtual()
+                },
+                include:{
+                    weapons:true
+                }
+            })
+            return dungeons
+        } catch (error) {
+            console.log(error)
+            throw new Error('Erro ao buscar armas para farmar:')
+        }
+    }
+    async getDungeonAndCharactersToFarmToday() {
+        try {
+            const dungeons = await prisma.dungeon.findMany({
+                where:{
+                    dayOfTheWeek: DiaDaSemana.obterDiaAtual()
+                },
+                include:{
+                    characters:true
+                }
+            })
+            return dungeons
+        } catch (error) {
+            console.log(error)
+            throw new Error('Erro ao buscar personagens para farmar')
+        }
+    }
+
     /**
      * 
      * @param {*} param0 

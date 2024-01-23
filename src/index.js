@@ -13,7 +13,6 @@ import dotenv from 'dotenv';
     const genshinBuildsMaalBot = new GenshinBuildsMaalBot();
 
     try {
-        
         await webCrawlerGenshinBuildsService.run()
         await genshinBuildsMaalBot.initBot()     
     } catch (error) {
