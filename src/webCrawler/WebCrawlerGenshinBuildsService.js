@@ -16,14 +16,16 @@ export default class WebCrawlerGenshinBuildsService{
     async run(){
         try {
             console.log('Iniciando web crawler service')
-            
-             cron.schedule('10 6 * * *', async () => {
+            await this.runWeapons()
+            await this.runCharacters()
+           
+            /* cron.schedule('10 6 * * *', async () => {
                 console.log('Iniciando o serviço às 6:10...');
                 await this.runWeapons()
                 await this.runCharacters()
                 const dataFinalizacao = new Date()
                 console.log(`Finalizando o serviço às ${dataFinalizacao.getHours()}:${dataFinalizacao.getMinutes()}`);
-              });
+              }); */
         } catch (error) {
             return error
         }
@@ -78,7 +80,7 @@ export default class WebCrawlerGenshinBuildsService{
                     let dungeonExist = await this.postgreDungeonRepository.findByName(key, this.dayOfTheWeek)
                     
                     if (dungeonExist === null){
-                        await this.postgreDungeonRepository.create({name:key, dayOfTheWeek: this.dayOfTheWeek})    
+                        dungeonExist = await this.postgreDungeonRepository.create({name:key, dayOfTheWeek: this.dayOfTheWeek})    
                     }
                     
                     value.map(async (/** @type {{ name: string; url: any; img: any; }} */ value) => {
