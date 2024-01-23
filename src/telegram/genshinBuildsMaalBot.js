@@ -203,20 +203,20 @@ export default class GenshinBuildsMaalBot {
                         } 
                 });
                 
-                await this.crawler.init(this.crawler.options.characters);
-                
+                const dungeonsAndCharacters = await this.postgreDungeonRepository.getDungeonAndCharactersToFarmToday()
                 await this.bot.sendMessage(chatId, `Personagens Disponível para Farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
                 
-                for (const [key, value] of Object.entries(this.crawler.dictCharacter)) {
-                    let quantityCharacters = value.length + 1;
+                for (const dungeon of dungeonsAndCharacters) {
+                    let quantityCharacters = dungeon.characters.length + 1;
                     await this.bot.sendMessage(chatId,
-                        `<b>${key}</b> \n\n${value.map((character) => {
+                        `<b>${dungeon.name}</b> \n\n${dungeon.characters.map((/** @type {{ url: any; name: any; }} */ character) => {
                             quantityCharacters--;
-                            const textResponse = `${(value.length - quantityCharacters) + 1} - <a href="${character.url}">${character.name}</a>`;
+                            const textResponse = `${(dungeon.characters.length - quantityCharacters) + 1} - <a href="${character.url}">${character.name}</a>`;
                             return textResponse;
                         }).join(' \n')}`
                         , { parse_mode: 'HTML' });
                 }
+            
             } catch (error) {
                 this.bot.sendMessage(chatId, 'Ocorreu um erro ao tentar obter os personagens.');
                 console.error(error);
@@ -253,7 +253,6 @@ export default class GenshinBuildsMaalBot {
                         } 
                 });
 
-                //await this.crawler.init(this.crawler.options.weapons);
                 const dungeonsAndWepons = await this.postgreDungeonRepository.getDungeonAndWeponsToFarmToday()             
                 
                 await this.bot.sendMessage(chatId, `Armas Disponível para Ffarmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
