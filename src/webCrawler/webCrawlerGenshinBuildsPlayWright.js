@@ -48,30 +48,37 @@ export default class WebCrawlerGenshinBuildsPlayWright {
 
                 console.log('Page created');
                 console.log('Navigating to ', this.url);
-                await this.page.goto(this.url);
+                
+                await this.page.goto(this.url, { waitUntil: 'networkidle' });
 
                 this.page.on('pageerror', error => {
                     console.log('PAGE ERROR:', error.message);
                     throw new Error("PAGE ERROR:" + error.message);
                 });
                 console.log('Page loaded ', this.page.url());
-                await this.wait(1000);
 
                 const diaAtual = DiaDaSemana.obterDiaAtual();
                 await this.clickButton(diaAtual);
 
                 if (characterOrWeapon === this.options.weapons) {
+                    console.log('get_dungeon_names');
                     await this.get_dungeon_names();
+                    console.log('get_weapons_data');
                     await this.get_weapons_data();
+                    console.log('get_weapons_data finished');
 
                 }
                 if (characterOrWeapon === this.options.characters) {
+                    console.log('get_characters_names');
                     await this.get_characters_names();
+                    console.log('get_characters_data');
                     await this.get_characters_data();
+                    console.log('get_characters_data finished');
                 }
             } catch (error) {
                 return error;
             }
+            
     }
 
     get_json_weapons() {
