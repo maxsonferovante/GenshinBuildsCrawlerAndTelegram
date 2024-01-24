@@ -37,11 +37,11 @@ export default class GenshinBuildsMaalBot {
         await this.sendCharacters();
         await this.sendWeapons();
         await this.sendAbout();
-        //await this.SendUpdateDaily();
+        await this.SendUpdateDaily();
         //await this.sendHelper();
     }
     async SendUpdateDaily() {
-        cron.schedule('20 6 * * *', async () => {
+        cron.schedule('20 9 * * *', async () => {
             console.log('Iniciando o serviço às 6:20...');
             const usersSaved = await this.postgreUserRepository.getAll()
 
@@ -204,6 +204,7 @@ export default class GenshinBuildsMaalBot {
                 });
                 
                 const dungeonsAndCharacters = await this.postgreDungeonRepository.getDungeonAndCharactersToFarmToday()
+                
                 await this.bot.sendMessage(chatId, `Personagens Disponível para Farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
                 
                 for (const dungeon of dungeonsAndCharacters) {

@@ -19,13 +19,13 @@ export default class WebCrawlerGenshinBuildsService{
             await this.runWeapons()
             await this.runCharacters()
            
-            /* cron.schedule('10 6 * * *', async () => {
+            cron.schedule('10 9 * * *', async () => {
                 console.log('Iniciando o serviço às 6:10...');
                 await this.runWeapons()
                 await this.runCharacters()
                 const dataFinalizacao = new Date()
                 console.log(`Finalizando o serviço às ${dataFinalizacao.getHours()}:${dataFinalizacao.getMinutes()}`);
-              }); */
+              });
         } catch (error) {
             return error
         }
@@ -37,7 +37,12 @@ export default class WebCrawlerGenshinBuildsService{
     async runWeapons(){
                 try {
                     console.log('Iniciando web crawler weapons')
-                    
+                   
+                    if (this.postgreDungeonRepository.existsToday()){
+                        console.log('Já existe um registro para o dia de hoje.')
+                        return;
+                    }
+    
                     const webCrawlerGenshinBuildsPlayWright = new WebCrawlerGenshinBuildsPlayWright(process.env.URL)
                     await webCrawlerGenshinBuildsPlayWright.init(webCrawlerGenshinBuildsPlayWright.options.weapons)
                     await webCrawlerGenshinBuildsPlayWright.close()
@@ -72,6 +77,11 @@ export default class WebCrawlerGenshinBuildsService{
             try {
                 console.log('Iniciando web crawler characters')
                 
+                if (this.postgreDungeonRepository.existsToday()){
+                    console.log('Já existe um registro para o dia de hoje.')
+                    return;
+                }
+
                 const webCrawlerGenshinBuildsPlayWright = new WebCrawlerGenshinBuildsPlayWright(process.env.URL)
                 await webCrawlerGenshinBuildsPlayWright.init(webCrawlerGenshinBuildsPlayWright.options.characters)
                 await webCrawlerGenshinBuildsPlayWright.close()
