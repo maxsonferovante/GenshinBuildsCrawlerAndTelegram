@@ -4,11 +4,14 @@ import DiaDaSemana from '../../utils/diaDaSemana.js';
 
 export default class PostgreDungeonRepository{
     
-    async existsToday(){
+    /**
+     * @param {string} [diasDaSemana]
+     */
+    async existsToday(diasDaSemana){
         try {
             const dungeon = await prisma.dungeon.findFirst({
                 where:{
-                    dayOfTheWeek: DiaDaSemana.obterDiaAtual(),
+                    dayOfTheWeek: diasDaSemana,
                     //2024-01-23T23:19:49.763Z 
                     createdAt:{
                         gte: new Date(new Date().setHours(0,0,0,0)).toISOString(),

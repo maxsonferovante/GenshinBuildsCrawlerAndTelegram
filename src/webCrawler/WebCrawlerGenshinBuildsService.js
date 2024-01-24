@@ -7,16 +7,17 @@ import DiaDaSemana from '../utils/diaDaSemana.js';
 import cron from 'node-cron';
 
 export default class WebCrawlerGenshinBuildsService{
+    
     constructor(){
         this.postgreWeaponsRepository = new PostgreWeaponsRepository();
         this.postgreCharacterRepository = new PostgreCharacterRepository();
         this.postgreDungeonRepository = new PostgreDungeonRepository();
-        this.dayOfTheWeek = DiaDaSemana.obterDiaAtual()
+        this.dayOfTheWeek = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado']
     }
     async run(){
         try {
             console.log('Iniciando web crawler service')
-            await this.runWeapons()
+            //await this.runWeapons()
             await this.runCharacters()
            
             cron.schedule('10 9 * * *', async () => {
@@ -37,37 +38,44 @@ export default class WebCrawlerGenshinBuildsService{
     async runWeapons(){
                 try {
                     console.log('Iniciando web crawler weapons')
-                   
-                    if (this.postgreDungeonRepository.existsToday()){
-                        console.log('Já existe um registro para o dia de hoje.')
-                        return;
-                    }
-    
                     const webCrawlerGenshinBuildsPlayWright = new WebCrawlerGenshinBuildsPlayWright(process.env.URL)
-                    await webCrawlerGenshinBuildsPlayWright.init(webCrawlerGenshinBuildsPlayWright.options.weapons)
-                    await webCrawlerGenshinBuildsPlayWright.close()
-                    
-                    
-                    for (const [key, value] of Object.entries(webCrawlerGenshinBuildsPlayWright.dictWeapon)) {
-                        
-                        let dungeonExist = await this.postgreDungeonRepository.findByName(key, this.dayOfTheWeek)
-                        
-                        if (dungeonExist === null){
-                            dungeonExist = await this.postgreDungeonRepository.create({name:key, dayOfTheWeek: this.dayOfTheWeek})                                            
+                    await webCrawlerGenshinBuildsPlayWright.init()
+
+                    for (const dia of this.dayOfTheWeek){
+                        console.log(`Verificando se já existe um registro para o dia : ${dia}`)
+                        if (await this.postgreDungeonRepository.existsToday(dia)){
+                            console.log(`Já existe um registro para o dia : ${dia}`)
+
                         }
-                       
-                            value.map(async (/** @type {{ name: string; url: string ; img: string; }} */ value) => {
-                                    
-                                if (this.postgreWeaponsRepository.existsByName(value.name, dungeonExist.id)){
-                                        await this.postgreWeaponsRepository.create({
-                                            name:value.name,
-                                            url:value.url,
-                                            img:value.img,
-                                            dungeonId: dungeonExist.id
-                                        })
-                                    }
-                            });                                            
-                    }
+                        else {
+                            console.log(`Iniciando o registro para o dia : ${dia}`)                                                         
+                            await webCrawlerGenshinBuildsPlayWright.getInitData(
+                                webCrawlerGenshinBuildsPlayWright.options.weapons, dia)
+                                                       
+                            
+                            for (const [key, value] of Object.entries(webCrawlerGenshinBuildsPlayWright.dictWeapon)) {
+                                
+                                let dungeonExist = await this.postgreDungeonRepository.findByName(key, dia)
+                                
+                                if (dungeonExist === null){
+                                    dungeonExist = await this.postgreDungeonRepository.create({name:key, dayOfTheWeek: dia})                                            
+                                }
+                               
+                                    value.map(async (/** @type {{ name: string; url: string ; img: string; }} */ value) => {
+                                            
+                                        if (this.postgreWeaponsRepository.existsByName(value.name, dungeonExist.id)){
+                                                await this.postgreWeaponsRepository.create({
+                                                    name:value.name,
+                                                    url:value.url,
+                                                    img:value.img,
+                                                    dungeonId: dungeonExist.id
+                                                })
+                                            }
+                                    });                                            
+                            }
+                        }
+                    }          
+                    await webCrawlerGenshinBuildsPlayWright.close()
                 } catch (error) {
                     return error
                 }
@@ -76,35 +84,38 @@ export default class WebCrawlerGenshinBuildsService{
     async runCharacters(){
             try {
                 console.log('Iniciando web crawler characters')
-                
-                if (this.postgreDungeonRepository.existsToday()){
-                    console.log('Já existe um registro para o dia de hoje.')
-                    return;
-                }
-
                 const webCrawlerGenshinBuildsPlayWright = new WebCrawlerGenshinBuildsPlayWright(process.env.URL)
-                await webCrawlerGenshinBuildsPlayWright.init(webCrawlerGenshinBuildsPlayWright.options.characters)
-                await webCrawlerGenshinBuildsPlayWright.close()
+                await webCrawlerGenshinBuildsPlayWright.init()
 
-                for (const [key, value] of Object.entries(webCrawlerGenshinBuildsPlayWright.dictCharacter)) {
-                    let dungeonExist = await this.postgreDungeonRepository.findByName(key, this.dayOfTheWeek)
-                    
-                    if (dungeonExist === null){
-                        dungeonExist = await this.postgreDungeonRepository.create({name:key, dayOfTheWeek: this.dayOfTheWeek})    
+                for (const dia of this.dayOfTheWeek){
+                    if (await this.postgreDungeonRepository.existsToday(dia)){
+                        console.log(`Já existe um registro para o dia : ${dia}`)
                     }
-                    
-                    value.map(async (/** @type {{ name: string; url: any; img: any; }} */ value) => {
-                        if (this.postgreCharacterRepository.existsByName(value.name, dungeonExist.id)){
-                            await this.postgreCharacterRepository.create({
-                                name:value.name,
-                                url:value.url,
-                                img:value.img,
-                                dungeonId: dungeonExist.id
-                            })
-                        }
-                    })                                                                
-                    
+                    else {
+                        console.log(`Iniciando o registro para o dia : ${dia}`)                                                         
+                        await webCrawlerGenshinBuildsPlayWright.getInitData(
+                            webCrawlerGenshinBuildsPlayWright.options.characters, dia)
+                            for (const [key, value] of Object.entries(webCrawlerGenshinBuildsPlayWright.dictCharacter)) {
+                                let dungeonExist = await this.postgreDungeonRepository.findByName(key, dia)
+                                
+                                if (dungeonExist === null){
+                                    dungeonExist = await this.postgreDungeonRepository.create({name:key, dayOfTheWeek: dia})    
+                                }
+                                
+                                value.map(async (/** @type {{ name: string; url: any; img: any; }} */ value) => {
+                                    if (this.postgreCharacterRepository.existsByName(value.name, dungeonExist.id)){
+                                        await this.postgreCharacterRepository.create({
+                                            name:value.name,
+                                            url:value.url,
+                                            img:value.img,
+                                            dungeonId: dungeonExist.id
+                                        })
+                                    }
+                                })                                                                                                
+                            }
+                    }
                 }
+                await webCrawlerGenshinBuildsPlayWright.close()
             } catch (error) {
                 return error
             }

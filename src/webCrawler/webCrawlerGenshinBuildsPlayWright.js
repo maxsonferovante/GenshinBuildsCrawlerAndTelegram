@@ -4,7 +4,6 @@ import DiaDaSemana from '../utils/diaDaSemana.js';
 export default class WebCrawlerGenshinBuildsPlayWright {
     /**
      * Initializes a new instance of the WebCrawlerGenshinBuildsPlayWright class.
-     * 
      * @param {string} url - The URL to be crawled.
      */
     constructor(url) {
@@ -20,13 +19,8 @@ export default class WebCrawlerGenshinBuildsPlayWright {
         }
     }
 
-    /**
-     * Initializes the web crawler by launching a headless browser, creating a new page, navigating to a specified URL,
-     * waiting for the page to load, clicking a button, and retrieving dungeon names and weapons data.
-     * @returns {Promise<void>} A promise that resolves once the initialization is complete.
-     * @param {string} [characterOrWeapon]
-     */
-    async init(characterOrWeapon) {
+    
+    async init() {
             try {
                 this.browser = await chromium.launch(
                     {
@@ -56,29 +50,41 @@ export default class WebCrawlerGenshinBuildsPlayWright {
                     throw new Error("PAGE ERROR:" + error.message);
                 });
                 console.log('Page loaded ', this.page.url());
-
-                const diaAtual = DiaDaSemana.obterDiaAtual();
-                await this.clickButton(diaAtual);
-
-                if (characterOrWeapon === this.options.weapons) {
-                    console.log('get_dungeon_names');
-                    await this.get_dungeon_names();
-                    console.log('get_weapons_data');
-                    await this.get_weapons_data();
-                    console.log('get_weapons_data finished');
-
-                }
-                if (characterOrWeapon === this.options.characters) {
-                    console.log('get_characters_names');
-                    await this.get_characters_names();
-                    console.log('get_characters_data');
-                    await this.get_characters_data();
-                    console.log('get_characters_data finished');
-                }
+                await this.wait(1000);                
             } catch (error) {
                 return error;
             }
             
+    }
+
+    /**
+     * Initializes the web crawler by launching a headless browser, creating a new page, navigating to a specified URL,
+     * waiting for the page to load, clicking a button, and retrieving dungeon names and weapons data.
+     * @returns {Promise<void>} A promise that resolves once the initialization is complete.
+     * @param {string} [characterOrWeapon]
+     * @param {string} diasDaSemana
+     */
+    // @ts-ignore
+    async getInitData(characterOrWeapon, diasDaSemana) {
+        await this.clickButton(diasDaSemana); 
+                    if (characterOrWeapon === this.options.weapons) {
+                        this.dictWeapon = {};
+                        console.log('get_dungeon_names');
+                        await this.get_dungeon_names();
+                        console.log('get_weapons_data');
+                        await this.get_weapons_data();
+                        console.log('get_weapons_data finished');   
+                    }
+                    if (characterOrWeapon === this.options.characters) {
+                        this.dictCharacter = {};
+                        console.log('get_characters_names');
+                        await this.get_characters_names();
+                        console.log('get_characters_data');
+                        await this.get_characters_data();
+                        console.log('get_characters_data finished');
+                    }
+                    console.log(`Web crawler aguardando 3 segundos...`)
+                    await this.wait(3000)     
     }
 
     get_json_weapons() {
