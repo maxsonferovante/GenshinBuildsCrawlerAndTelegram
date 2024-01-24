@@ -63,7 +63,7 @@ export default class WebCrawlerGenshinBuildsService{
                                
                                     value.map(async (/** @type {{ name: string; url: string ; img: string; }} */ value) => {
                                             
-                                        if (this.postgreWeaponsRepository.existsByName(value.name, dungeonExist.id)){
+                                        if (await this.postgreWeaponsRepository.existsByName(value.name, dungeonExist.id)){
                                                 await this.postgreWeaponsRepository.create({
                                                     name:value.name,
                                                     url:value.url,
@@ -103,7 +103,7 @@ export default class WebCrawlerGenshinBuildsService{
                                 }
                                 
                                 value.map(async (/** @type {{ name: string; url: any; img: any; }} */ value) => {
-                                    if (this.postgreCharacterRepository.existsByName(value.name, dungeonExist.id)){
+                                    if (await  this.postgreCharacterRepository.existsByName(value.name, dungeonExist.id)){
                                         await this.postgreCharacterRepository.create({
                                             name:value.name,
                                             url:value.url,
