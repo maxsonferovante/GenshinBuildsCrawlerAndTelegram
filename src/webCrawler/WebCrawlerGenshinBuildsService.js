@@ -17,7 +17,7 @@ export default class WebCrawlerGenshinBuildsService{
     async run(){
         try {
             console.log('Iniciando web crawler service')
-            //await this.runWeapons()
+            await this.runWeapons()
             await this.runCharacters()
            
             cron.schedule('10 9 * * *', async () => {

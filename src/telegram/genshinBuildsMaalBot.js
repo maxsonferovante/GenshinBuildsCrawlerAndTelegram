@@ -204,7 +204,9 @@ export default class GenshinBuildsMaalBot {
                 });
                 
                 const dungeonsAndCharacters = await this.postgreDungeonRepository.getDungeonAndCharactersToFarmToday()
-                
+                if (dungeonsAndCharacters.length == 0) {
+                    throw new Error('Não foi possível obter os personagens.')
+                }
                 await this.bot.sendMessage(chatId, `Personagens Disponível para Farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
                 
                 for (const dungeon of dungeonsAndCharacters) {
@@ -255,7 +257,9 @@ export default class GenshinBuildsMaalBot {
                 });
 
                 const dungeonsAndWepons = await this.postgreDungeonRepository.getDungeonAndWeponsToFarmToday()             
-                
+                if (dungeonsAndWepons.length == 0) {
+                    throw new Error('Não foi possível obter as armas.')
+                }                
                 await this.bot.sendMessage(chatId, `Armas Disponível para Ffarmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
 
                 for (const dungeon of dungeonsAndWepons) {
