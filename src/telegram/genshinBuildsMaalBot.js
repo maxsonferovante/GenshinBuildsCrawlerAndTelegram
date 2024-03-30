@@ -5,9 +5,9 @@ import cron from 'node-cron';
 
 import DiaDaSemana from '../utils/diaDaSemana.js';
 
-import WebCrawlerGenshinBuildsPlayWright from '../webCrawler/webCrawlerGenshinBuildsPlayWright.js';
+import WebCrawlerGenshinBuildsRequestAndCheerio from '../webCrawler/webCrwletGenshinBuildRequestAndCheerio.js';
 import PostgreUserRepository from '../database/repositories/postgreUserRepository.js'; 
-import PostgreDungeonRepository from '../database/repositories/postgreDungeonRepository.js';
+
 
 const LINK_REPOSITORY = "https://github.com/maxsonferovante/GenshinBuildsCrawlerAndTelegram"
 
@@ -22,11 +22,10 @@ export default class GenshinBuildsMaalBot {
         console.log('GenshinBuildsMaalBot initialized ...');
 
         this.postgreUserRepository = new PostgreUserRepository();
-        this.postgreDungeonRepository = new PostgreDungeonRepository();
 
         this.bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true, filepath: false });
 
-        this.crawler = new WebCrawlerGenshinBuildsPlayWright(process.env.URL);
+        this.crawler = new WebCrawlerGenshinBuildsRequestAndCheerio(process.env.URL);
 
         this.fileBuffer = fs.readFileSync('./src/media/img/logo.png');
 
@@ -38,91 +37,93 @@ export default class GenshinBuildsMaalBot {
         await this.sendWeapons();
         await this.sendAbout();
         await this.SendUpdateDaily();
-        //await this.sendHelper();
+        await this.sendHelper();
     }
     async SendUpdateDaily() {
-        cron.schedule('20 9 * * *', async () => {
-            console.log('Iniciando o serviço às 6:20...');
-            const usersSaved = await this.postgreUserRepository.getAll()
-
-            for (const user of usersSaved) {
-                const chatId = user.chatId;
-                try {
-                    await this.bot.sendMessage(chatId,
-                        `<i> Aguarde, estamos buscando as armas disponíveis para farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) ... </i>`,
-                        {
-                            parse_mode: 'HTML',
-                            reply_markup: {
-                                // @ts-ignore
-                                "keyboard": this.keyboard,
-                                "resize_keyboard": true,
-                                "one_time_keyboard": true
-                            }
-                        });
-
-                    await this.crawler.init(
-                        this.crawler.options.weapons
-                    );
-                    await this.bot.sendMessage(chatId, `Armas Disponível para Farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
-
-                    for (const [key, value] of Object.entries(this.crawler.dictWeapon)) {
-                        let quantityWeapons = value.length + 1;
+        try {
+            cron.schedule('20 9 * * *', async () => {
+                console.log('Iniciando o serviço às 6:20...');
+                
+                await this.crawler.initExtratcData('SendUpdateDaily');            
+                
+                const usersSaved = await this.postgreUserRepository.getAll()
+                
+                for (const user of usersSaved) {
+                    const chatId = user.chatId;
+                    try {
                         await this.bot.sendMessage(chatId,
-                            `<b>${key}</b> \n\n${value.map((weapon) => {
-                                quantityWeapons--;
-                                const textResponse = `${(value.length - quantityWeapons) + 1} - <a href="${weapon.url}">${weapon.name}</a>`;
-                                return textResponse;
-                            }).join(' \n')}`
-                            , { parse_mode: 'HTML' });
+                            `<i> Aguarde, estamos buscando as armas disponíveis para farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) ... </i>`,
+                            {
+                                parse_mode: 'HTML',
+                                reply_markup: {
+                                    // @ts-ignore
+                                    "keyboard": this.keyboard,
+                                    "resize_keyboard": true,
+                                    "one_time_keyboard": true
+                                }
+                            });
+                       
+    
+                        await this.bot.sendMessage(chatId, `Armas Disponível para Farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
+    
+                        for (const key in this.crawler.dictWeapon) {
+                            let quantityWeapons = this.crawler.dictWeapon[key].length + 1;
+                            await this.bot.sendMessage(chatId,
+                                `<b>${key}</b> \n\n${this.crawler.dictWeapon[key].map((/** @type {{ url: any; name: any; }} */ weapon) => {
+                                    quantityWeapons--;
+                                    const textResponse = `${(this.crawler.dictWeapon[key].length - quantityWeapons) + 1} - <a href="${weapon.url}">${weapon.name}</a>`;
+                                    return textResponse;
+                                }).join(' \n')}`
+                                , { parse_mode: 'HTML' });
+                        }  
+        
+    
+                    } catch (error) {
+                        throw new Error(error);
                     }
-
-                } catch (error) {
-                    this.bot.sendMessage(chatId, 'Ocorreu um erro ao tentar obter as armas.');
-                    console.error(error);
+                    
+    
+                    try{
+                        await this.bot.sendMessage(chatId,
+                            `<i> Aguarde, estamos buscando os personagens disponíveis para farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) ... </i>`,
+                            {
+                                parse_mode: 'HTML',
+                                reply_markup: {
+                                    // @ts-ignore
+                                    "keyboard": this.keyboard,
+                                    "resize_keyboard": true,
+                                    "one_time_keyboard": true
+                                }
+                            });
+    
+    
+                        await this.bot.sendMessage(chatId, `Personagens Disponível para Farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
+    
+                        for (const key in this.crawler.dictCharacter) {
+                            let quantityCharacters = this.crawler.dictCharacter[key].length + 1;
+                            await this.bot.sendMessage(chatId,
+                                `<b>${key}</b> \n\n${this.crawler.dictCharacter[key].map((/** @type {{ url: any; name: any; }} */ character) => {
+                                    quantityCharacters--;
+                                    const textResponse = `${(this.crawler.dictCharacter[key].length - quantityCharacters) + 1} - <a href="${character.url}">${character.name}</a>`;
+                                    return textResponse;
+                                }).join(' \n')}`
+                                , { parse_mode: 'HTML' });
+                        }
+                    }
+                    catch(error){
+                        throw new Error(error);
+                    }
+                    
                 }
                 
-
-                try{
-                    await this.bot.sendMessage(chatId,
-                        `<i> Aguarde, estamos buscando os personagens disponíveis para farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) ... </i>`,
-                        {
-                            parse_mode: 'HTML',
-                            reply_markup: {
-                                // @ts-ignore
-                                "keyboard": this.keyboard,
-                                "resize_keyboard": true,
-                                "one_time_keyboard": true
-                            }
-                        });
-
-                    await this.crawler.init(
-                        this.crawler.options.characters
-                    );
-
-                    await this.bot.sendMessage(chatId, `Personagens Disponível para Farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
-
-                    for (const [key, value] of Object.entries(this.crawler.dictCharacter)) {
-                        let quantityCharacters = value.length + 1;
-                        await this.bot.sendMessage(chatId,
-                            `<b>${key}</b> \n\n${value.map((character) => {
-                                quantityCharacters--;
-                                const textResponse = `${(value.length - quantityCharacters) + 1} - <a href="${character.url}">${character.name}</a>`;
-                                return textResponse;
-                            }).join(' \n')}`
-                            , { parse_mode: 'HTML' });
-                    }
-                }
-                catch(error){
-                    console.log(error)
-                }
-                
-            }
-            
-            
-            
-            const dataFinalizacao = new Date()
-            console.log(`Finalizando o serviço às ${dataFinalizacao.getHours()}:${dataFinalizacao.getMinutes()}`);
-        });
+                const dataFinalizacao = new Date()
+                console.log(`Finalizando o serviço às ${dataFinalizacao.getHours()}:${dataFinalizacao.getMinutes()}`);
+            });    
+        } catch (error) {
+            console.log(error)
+            await this.bot.sendMessage(process.env.CHAT_ID_ADM, 'Ocorreu um erro ao tentar enviar o SendUpdateDaily.');
+            await this.bot.sendMessage(process.env.CHAT_ID_ADM, error);
+        }
     }
 
     /**
@@ -157,6 +158,14 @@ export default class GenshinBuildsMaalBot {
                         firstName: msg.from.first_name,
                         lastName: msg.from.last_name,
                         chatId: msg.chat.id
+                    });
+
+                    await this.sendInfoDeveloper({
+                        chatId: chatId,
+                        firstName: msg.from.first_name,
+                        lastName: msg.from.last_name,
+                        userExist: userExist,
+                        command: '/start'
                     });
                 }
                 await this.bot.sendPhoto(
@@ -203,18 +212,17 @@ export default class GenshinBuildsMaalBot {
                         } 
                 });
                 
-                const dungeonsAndCharacters = await this.postgreDungeonRepository.getDungeonAndCharactersToFarmToday()
-                if (dungeonsAndCharacters.length == 0) {
-                    throw new Error('Não foi possível obter os personagens.')
-                }
+                await this.crawler.initExtratcData(chatId);
+                
+
                 await this.bot.sendMessage(chatId, `Personagens Disponível para Farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
                 
-                for (const dungeon of dungeonsAndCharacters) {
-                    let quantityCharacters = dungeon.characters.length + 1;
+                for (const key in this.crawler.dictCharacter) {
+                    let quantityCharacters = this.crawler.dictCharacter[key].length + 1;
                     await this.bot.sendMessage(chatId,
-                        `<b>${dungeon.name}</b> \n\n${dungeon.characters.map((/** @type {{ url: any; name: any; }} */ character) => {
+                        `<b>${key}</b> \n\n${this.crawler.dictCharacter[key].map((/** @type {{ url: any; name: any; }} */ character) => {
                             quantityCharacters--;
-                            const textResponse = `${(dungeon.characters.length - quantityCharacters) + 1} - <a href="${character.url}">${character.name}</a>`;
+                            const textResponse = `${(this.crawler.dictCharacter[key].length - quantityCharacters) + 1} - <a href="${character.url}">${character.name}</a>`;
                             return textResponse;
                         }).join(' \n')}`
                         , { parse_mode: 'HTML' });
@@ -225,6 +233,13 @@ export default class GenshinBuildsMaalBot {
                 console.error(error);
             }
             finally {
+                await this.sendInfoDeveloper({
+                    chatId: chatId,
+                    firstName: msg.from.first_name,
+                    lastName: msg.from.last_name,
+                    userExist: null,
+                    command: '/characters'
+                });
                 console.log(`End sendCharacters ${chatId}`)
             }
         });
@@ -256,18 +271,16 @@ export default class GenshinBuildsMaalBot {
                         } 
                 });
 
-                const dungeonsAndWepons = await this.postgreDungeonRepository.getDungeonAndWeponsToFarmToday()             
-                if (dungeonsAndWepons.length == 0) {
-                    throw new Error('Não foi possível obter as armas.')
-                }                
-                await this.bot.sendMessage(chatId, `Armas Disponível para Ffarmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
+                await this.crawler.initExtratcData(chatId);
 
-                for (const dungeon of dungeonsAndWepons) {
-                    let quantityWeapons = dungeon.weapons.length + 1;
+                await this.bot.sendMessage(chatId, `Armas Disponível para Ffarmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
+                
+                for (const key in this.crawler.dictWeapon) {
+                    let quantityWeapons = this.crawler.dictWeapon[key].length + 1;
                     await this.bot.sendMessage(chatId,
-                        `<b>${dungeon.name}</b> \n\n${dungeon.weapons.map((/** @type {{ url: any; name: any; }} */ weapon) => {
+                        `<b>${key}</b> \n\n${this.crawler.dictWeapon[key].map((/** @type {{ url: any; name: any; }} */ weapon) => {
                             quantityWeapons--;
-                            const textResponse = `${(dungeon.weapons.length - quantityWeapons) + 1} - <a href="${weapon.url}">${weapon.name}</a>`;
+                            const textResponse = `${(this.crawler.dictWeapon[key].length - quantityWeapons) + 1} - <a href="${weapon.url}">${weapon.name}</a>`;
                             return textResponse;
                         }).join(' \n')}`
                         , { parse_mode: 'HTML' });
@@ -278,6 +291,13 @@ export default class GenshinBuildsMaalBot {
                 console.error(error);
             }
             finally {
+                await this.sendInfoDeveloper({
+                    chatId: chatId,
+                    firstName: msg.from.first_name,
+                    lastName: msg.from.last_name,
+                    userExist: null,
+                    command: '/weapons'
+                });
                 console.log(`End sendCharacters ${chatId}`)
             }
         });
@@ -376,5 +396,23 @@ export default class GenshinBuildsMaalBot {
                 console.error(error);
             }
         });
+    }
+
+    /**
+     * @param {{ chatId: any; firstName: any; lastName: any; userExist?: boolean; command: string}} data
+     */
+    async sendInfoDeveloper(data){
+        const dataAtual = new Date().toLocaleString().replace(/T/, ' ').replace(/\..+/, '');
+        
+        const mensagem = data.userExist ? `O usuário usou o comando: ${data.command}` : `Um novo usuário acessou o bot Genshin-Builds Maal-Bot.
+        \n Nome: ${data.firstName} ${data.lastName}
+        \n ChatId: ${data.chatId}
+        \n Data: ${dataAtual}`
+        
+        try {
+            await this.bot.sendMessage(process.env.CHAT_ID_ADM,mensagem);
+        } catch (error) {
+            console.log(error)
+        }
     }
 }
