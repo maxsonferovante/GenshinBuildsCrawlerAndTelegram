@@ -11,7 +11,9 @@ services:
       - .env
     networks:
       - genshin-net
-  
+    environment:
+      - TZ=America/Sao_Paulo 
+
   postgres:
     image: postgres
     container_name: genshin-postgres
@@ -24,6 +26,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: genshin_builds
+      
     
     volumes:
       - /var/lib/postgresql/data # cria e monta um volume anônimo no contêiner
