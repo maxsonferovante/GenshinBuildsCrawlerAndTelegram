@@ -18,7 +18,23 @@ export default class WebCrawlerGenshinBuildsRequestAndCheerio {
     
     async initExtratcData(chatId) {
         try {
-            const response = await axios.get(this.url);
+            //const response = await axios.get(this.url);
+            const options = {
+                Timeout: 40,
+                Method: 'GET',
+                Url: this.url,
+                UserAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+            }
+            const response = await axios.post(
+                'http://0.0.0.0:9090',
+                {
+                    TLSOptions: options
+                },
+                {
+                    timeout: ((40 * 1000) + 10000)
+                }
+            );
+
             switch (response.status) {
                 case 200:
                     console.log(`Resquest Success - ChatId: ${chatId}`)
@@ -41,7 +57,7 @@ export default class WebCrawlerGenshinBuildsRequestAndCheerio {
      */
     loadData(response) {
         try {
-            this.$ = cheerio.load(response.data);
+            this.$ = cheerio.load(response.data.data);
         } catch (error) {
             throw new Error('Error loading data - cheerio.load()');
         }
