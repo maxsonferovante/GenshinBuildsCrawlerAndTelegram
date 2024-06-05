@@ -36,7 +36,7 @@ export default class GenshinBuildsMaalBot {
         await this.sendCharacters();
         await this.sendWeapons();
         await this.sendAbout();
-        await this.SendUpdateDaily();
+        //await this.SendUpdateDaily();
         await this.sendHelper();
     }
     async SendUpdateDaily() {
