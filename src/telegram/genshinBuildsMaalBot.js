@@ -273,7 +273,7 @@ export default class GenshinBuildsMaalBot {
 
                 await this.crawler.initExtratcData(chatId);
 
-                await this.bot.sendMessage(chatId, `Armas Disponível para Ffarmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
+                await this.bot.sendMessage(chatId, `Armas Disponível para Farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
                 
                 for (const key in this.crawler.dictWeapon) {
                     let quantityWeapons = this.crawler.dictWeapon[key].length + 1;
