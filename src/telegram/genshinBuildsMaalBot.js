@@ -5,7 +5,7 @@ import cron from 'node-cron';
 
 import DiaDaSemana from '../utils/diaDaSemana.js';
 
-import WebCrawlerGenshinBuildsRequestAndCheerio from '../webCrawler/webCrwletGenshinBuildRequestAndCheerio.js';
+import genshinBuildAPI from '../webCrawler/genshinBuildAPI.js';
 import PostgreUserRepository from '../database/repositories/postgreUserRepository.js'; 
 
 
@@ -25,7 +25,7 @@ export default class GenshinBuildsMaalBot {
 
         this.bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true, filepath: false });
 
-        this.crawler = new WebCrawlerGenshinBuildsRequestAndCheerio(process.env.URL);
+        this.crawler = new genshinBuildAPI();
 
         this.fileBuffer = fs.readFileSync('./src/media/img/logo.png');
 
@@ -44,7 +44,8 @@ export default class GenshinBuildsMaalBot {
             cron.schedule('20 9 * * *', async () => {
                 console.log('Iniciando o serviço às 6:20...');
                 
-                await this.crawler.initExtratcData('SendUpdateDaily');            
+                await this.crawler.getCharacterList("1234");
+                await this.crawler.getWeaponList("1234");
                 
                 const usersSaved = await this.postgreUserRepository.getAll()
                 
@@ -212,8 +213,7 @@ export default class GenshinBuildsMaalBot {
                         } 
                 });
                 
-                await this.crawler.initExtratcData(chatId);
-                
+                await this.crawler.getCharacterList(chatId);                
 
                 await this.bot.sendMessage(chatId, `Personagens Disponível para Farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
                 
@@ -271,7 +271,7 @@ export default class GenshinBuildsMaalBot {
                         } 
                 });
 
-                await this.crawler.initExtratcData(chatId);
+                await this.crawler.getWeaponList(chatId);
 
                 await this.bot.sendMessage(chatId, `Armas Disponível para Farmar hoje (${DiaDaSemana.obterDataAtualComDiaDaSemana()}) são : \n\n`, { parse_mode: 'HTML' });
                 
